@@ -1,50 +1,86 @@
-const { document } = require('./helpers')
-const { expect } = require('chai')
+const { TextEncoder, TextDecoder } = require('util')
 
-// Sample test suite for JavaScript event handling
-describe('Handling Events with JavaScript', () => {
-  let changeColorButton
-  let resetColorButton
-  let textInput
-  let keyPressDisplay
-  let textInputDisplay
+global.TextEncoder = TextEncoder
+global.TextDecoder = TextDecoder
 
-  before(() => {
-    changeColorButton = document.getElementById('changeColorButton')
-    resetColorButton = document.getElementById('resetColorButton')
-    textInput = document.getElementById('textInput')
-    keyPressDisplay = document.getElementById('keyPressDisplay')
-    textInputDisplay = document.getElementById('textInputDisplay')
+const { resetDOM } = require('./helpers')
+const {
+  changeBackgroundColor,
+  resetBackgroundColor,
+  displayKeyPress,
+  displayUserInput,
+  setupEventListeners,
+} = require('../index.js')
+
+describe('Event Handling Tests', () => {
+  beforeEach(() => {
+    resetDOM() // Reset the DOM structure
+    setupEventListeners() // Attach event listeners
   })
 
-  it('should select the changeColorButton element', () => {
-    expect(changeColorButton).to.not.be.null
+  test('changeBackgroundColor generates a valid color', () => {
+    changeBackgroundColor()
+    const currentColor = document.body.style.backgroundColor
+    expect(currentColor).toMatch(/^rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)$/) // Validate rgb() format
   })
 
-  it('should select the resetColorButton element', () => {
-    expect(resetColorButton).to.not.be.null
+  test('resetBackgroundColor clears the body background color', () => {
+    document.body.style.backgroundColor = 'rgb(18, 52, 86)'
+    resetBackgroundColor()
+    expect(document.body.style.backgroundColor).toBe('')
   })
 
-  it('should select the textInput element', () => {
-    expect(textInput).to.not.be.null
+  test('changeBackgroundColor changes the body background color via button click', () => {
+    const changeColorButton = document.getElementById('changeColorButton')
+    expect(changeColorButton).not.toBeNull()
+
+    changeColorButton.click()
+    const currentColor = document.body.style.backgroundColor
+    expect(currentColor).toMatch(/^rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)$/) // Validate rgb() format
   })
 
-  it('should display the key pressed by the user', () => {
-    // Simulate key press
-    const event = new dom.window.KeyboardEvent('keydown', { key: 'A' })
-    document.dispatchEvent(event)
+  test('resetBackgroundColor resets the body background color via double-click', () => {
+    const resetColorButton = document.getElementById('resetColorButton')
+    expect(resetColorButton).not.toBeNull()
 
-    // Check if the keyPressDisplay has been updated
-    expect(keyPressDisplay.textContent).to.include('A')
+    document.body.style.backgroundColor = 'rgb(18, 52, 86)'
+    resetColorButton.dispatchEvent(new Event('dblclick'))
+    expect(document.body.style.backgroundColor).toBe('')
   })
 
-  it('should display user input in real-time', () => {
-    // Simulate user input
+  test('displayKeyPress updates the key press display directly', () => {
+    const mockEvent = new KeyboardEvent('keydown', { key: 'B' })
+    displayKeyPress(mockEvent)
+    const keyPressDisplay = document.getElementById('keyPressDisplay')
+    expect(keyPressDisplay).not.toBeNull()
+    expect(keyPressDisplay.textContent).toBe('Key pressed: B')
+  })
+
+  test('displayUserInput updates the input display directly', () => {
+    const textInput = document.getElementById('textInput')
+    const textInputDisplay = document.getElementById('textInputDisplay')
+
+    textInput.value = 'Test Input'
+    displayUserInput()
+    expect(textInputDisplay).not.toBeNull()
+    expect(textInputDisplay.textContent).toBe('You typed: Test Input')
+  })
+
+  test('displayKeyPress updates the key press display via keydown event', () => {
+    const mockEvent = new KeyboardEvent('keydown', { key: 'A' })
+    document.dispatchEvent(mockEvent)
+    const keyPressDisplay = document.getElementById('keyPressDisplay')
+    expect(keyPressDisplay).not.toBeNull() // Ensure the div exists
+    expect(keyPressDisplay.textContent).toBe('Key pressed: A')
+  })
+
+  test('displayUserInput updates the input display in real-time via input event', () => {
+    const textInput = document.getElementById('textInput')
+    const textInputDisplay = document.getElementById('textInputDisplay')
+
     textInput.value = 'Hello'
-    const event = new dom.window.Event('input')
-    textInput.dispatchEvent(event)
-
-    // Check if the textInputDisplay has been updated
-    expect(textInputDisplay.textContent).to.include('Hello')
+    textInput.dispatchEvent(new Event('input'))
+    expect(textInputDisplay).not.toBeNull() // Ensure the div exists
+    expect(textInputDisplay.textContent).toBe('You typed: Hello')
   })
 })
