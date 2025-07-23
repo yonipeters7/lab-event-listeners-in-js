@@ -1,14 +1,12 @@
-// Helpers for setting up the testing environment
-const { JSDOM } = require('jsdom')
-const fs = require('fs')
-
-const html = fs.readFileSync('src/index.html', 'utf8')
-
-const dom = new JSDOM(html)
-const document = dom.window.document
-
-global.document = document
-
-module.exports = {
-  document,
+function resetDOM() {
+  document.body.innerHTML = `
+    <h1>Lab: Event Listeners With JavaScript</h1>
+    <button id="changeColorButton">Change Background Color</button>
+    <button id="resetColorButton">Reset Background Color</button>
+    <p id="keyPressDisplay">Press any key...</p>
+    <input type="text" id="textInput" placeholder="Type something...">
+    <p id="textInputDisplay">Your input will be displayed here.</p>
+  `
 }
+
+module.exports = { resetDOM }
