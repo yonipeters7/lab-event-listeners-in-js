@@ -25,7 +25,6 @@ function displayUserInput() {
 }
 
 // Attach Event Listeners
-// Attach Event Listeners
 function setupEventListeners() {
 // Attach event listener to change background color when the button is clicked
   document
